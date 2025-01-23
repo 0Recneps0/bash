@@ -1,4 +1,3 @@
-```markdown
 # CyberPatriot Hardening Script
 
 ## 🚀 Getting Started

@@ -1,5 +1,3 @@
-
-```bash
 #!/usr/bin/env bash
 # CyberPatriot Ultimate Hardening Suite
 # Version 8.1 - Final
@@ -190,4 +188,3 @@ main() {
 }
 
 main
-```

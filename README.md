@@ -3,7 +3,7 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Linux system (Ubuntu/Debian recommended)
+- Linux
 - Internet connection (for dependency installation)
 - Root privileges
 
@@ -13,7 +13,7 @@
 
 2. **Make the script executable**:
    ```bash
-   chmod +x cyberpatriot.sh
+   chmod +x bashv#.sh
    ```
 
 ---

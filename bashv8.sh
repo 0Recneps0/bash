@@ -1065,7 +1065,7 @@ feature_menu() {
     command_exists clear && clear || printf '\033[2J\033[H'
 
     color_echo "${GREEN}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${NC}"
-    color_echo "${GREEN}┃        CyberPatriot Toolkit            ┃${NC}"
+    color_echo "${GREEN}┃           Recneps Toolkit              ┃${NC}"
     color_echo "${GREEN}┃     Enhanced Security Suite v8.2       ┃${NC}"
     color_echo "${GREEN}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┗${NC}"
     echo
@@ -1525,7 +1525,7 @@ main() {
                 forensics_decrypt_message
                 ;;
             15)
-                color_echo "${GREEN}Thank you for using CyberPatriot Toolkit!${NC}"
+                color_echo "${GREEN}recneps${NC}"
                 log_info "CyberPatriot toolkit session ended"
                 exit 0
                 ;;

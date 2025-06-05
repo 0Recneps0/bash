@@ -1531,7 +1531,7 @@ main() {
                 forensics_decrypt_message
                 ;;
             15)
-                color_echo "${GREEN}recneps${NC}"
+                color_echo "${GREEN}https://github.com/0Recneps0/bash${NC}"
                 log_info "CyberPatriot toolkit session ended"
                 exit 0
                 ;;

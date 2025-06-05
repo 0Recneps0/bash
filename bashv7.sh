@@ -1316,23 +1316,18 @@ main() {
                 view_logs
                 ;;
             13)
-                color_echo "${CYAN}Fuzzy Search Instructions:${NC}"
-                color_echo "${BLUE}- Use arrow keys or Ctrl-N/P to move up/down the list of files.${NC}"
-                color_echo "${BLUE}- Type to filter files by name (supports fuzzy matching, case-insensitive).${NC}"
-                color_echo "${BLUE}- Press Enter to select a file and exit. The selected file path will be printed to the terminal.${NC}"
-                color_echo "${BLUE}- Press Tab or Shift-Tab to mark multiple files (multi-select, if enabled).${NC}"
-                color_echo "${BLUE}- Use Ctrl-A to select all, Ctrl-D to deselect all (multi-select, if enabled).${NC}"
-                color_echo "${BLUE}- Use the right arrow or Ctrl-/ to toggle the preview window showing file contents.${NC}"
-                color_echo "${BLUE}- Press ESC or Ctrl-C to cancel and return to the menu without selecting a file.${NC}"
-                color_echo "${BLUE}- Search supports AND (space), OR (|), and NOT (!) operators for advanced filtering.${NC}"
-                color_echo "${BLUE}- You can resize the preview window with Alt+Up/Down (if your terminal supports it).${NC}"
-                color_echo "${BLUE}- If you see no files, check your permissions or try running as administrator/root.${NC}"
-                color_echo "${BLUE}- The search starts in the current directory. To search elsewhere, run: fzf_search /path/to/dir${NC}"
-                color_echo "${BLUE}- If you have 'bat' or 'batcat' installed, previews will be syntax-highlighted. Otherwise, plain text is shown.${NC}"
-                color_echo "${YELLOW}Tip: For best results, use fzf in a true terminal (not a limited shell window).${NC}"
-                color_echo "${YELLOW}Tip: You can pipe the result to other commands, e.g., open, less, or cat.${NC}"
-                color_echo "${BLUE}- To search for files containing a literal substring (like .mp3), type a single quote ' before your search term: '.mp3${NC}"
-                color_echo "${BLUE}  This will only show files with .mp3 in their name (not fuzzy matches).${NC}"
+                color_echo "${CYAN}Fuzzy Search Quick Guide:${NC}"
+                color_echo "${BLUE}- Type to filter files. Use arrows to move, Enter to select, ESC to cancel.${NC}"
+                color_echo "${CYAN}  Operators:${NC}"
+                color_echo "${GREEN}    AND${NC}${BLUE}: Space between words to match all (AND)${NC}      ${YELLOW}e.g.${NC} ${WHITE}config log${NC}"
+                color_echo "${GREEN}    OR${NC}${BLUE}: Use | (pipe) to match either (OR)${NC}           ${YELLOW}e.g.${NC} ${WHITE}conf|log${NC}"
+                color_echo "${GREEN}    NOT${NC}${BLUE}: Use ! before a word to exclude (NOT)${NC}        ${YELLOW}e.g.${NC} ${WHITE}!tmp${NC}"
+                color_echo "${GREEN}    Exact${NC}${BLUE}: Start with ' (single quote) for exact match${NC} ${YELLOW}e.g.${NC} ${WHITE}'.mp3${NC}"
+                color_echo "${GREEN}    Case-sensitive${NC}${BLUE}: Start with ' and use capitals${NC}     ${YELLOW}e.g.${NC} ${WHITE}'README${NC}"
+                color_echo "${CYAN}  Other:${NC}"
+                color_echo "${BLUE}- Multi-select: Tab to mark, Enter to confirm (if enabled)${NC}"
+                color_echo "${BLUE}- Preview: Right arrow or Ctrl-/ (if supported)${NC}"
+                color_echo "${YELLOW}Tip: Leave directory blank to search the whole system.${NC}"
                 fzf_search
                 ;;
             14)

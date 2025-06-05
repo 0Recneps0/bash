@@ -178,8 +178,6 @@ install_dependencies() {
         xdg-utils tree
         net-tools psmisc
         fail2ban
-        fzf
-        bat
     )
 
     local all_deps=("${security_deps[@]}" "${system_deps[@]}")
@@ -337,27 +335,6 @@ user_security() {
     log_info "User security hardening completed"
 }
 
-# Use fzf for selection if available
-fzf_select() {
-    local prompt="$1"
-    shift
-    if command_exists fzf && [[ -t 0 ]]; then
-        printf "%s\n" "$@" | fzf --prompt="$prompt " --height=10 --border --ansi
-    else
-        # fallback: print options and prompt
-        local i=1
-        for opt in "$@"; do
-            echo "$i. $opt"
-            ((i++))
-        done
-        local sel
-        read -rp "$prompt (1-$((i-1))): " sel
-        if [[ "$sel" =~ ^[0-9]+$ ]] && (( sel >= 1 && sel < i )); then
-            echo "${@:$sel:1}"
-        fi
-    fi
-}
-
 # Interactive user account review
 review_user_accounts() {
     color_echo "${CYAN}Reviewing user accounts...${NC}"
@@ -372,24 +349,8 @@ review_user_accounts() {
 
         local review_accounts="n"
         if ! $NON_INTERACTIVE; then
-            if command_exists fzf && [[ -t 0 ]]; then
-                local selected_user
-                selected_user=$(printf "%s\n" $human_users | fzf --prompt="Select user to review (ESC to skip): " --height=10 --border --ansi)
-                if [[ -n "$selected_user" ]]; then
-                    color_echo "${CYAN}User: $selected_user${NC}"
-                    id "$selected_user" 2>/dev/null || true
-                    local lock_user="n"
-                    read -rp "Lock this account? [y/N]: " -n 1 lock_user
-                    echo
-                    if [[ $lock_user =~ ^[Yy]$ ]]; then
-                        usermod -L "$selected_user"
-                        log_info "Locked user account: $selected_user"
-                    fi
-                fi
-            else
-                read -rp "Review each account? [y/N]: " -n 1 review_accounts
-                echo
-            fi
+            read -rp "Review each account? [y/N]: " -n 1 review_accounts
+            echo
         fi
 
         if [[ $review_accounts =~ ^[Yy]$ ]]; then
@@ -900,19 +861,6 @@ cyber_resources() {
         local res
         if $NON_INTERACTIVE; then
             res=0
-        elif command_exists fzf && [[ -t 0 ]]; then
-            local selection
-            selection=$(fzf_select "Select resource" "${resources[@]}")
-            if [[ -z "$selection" ]]; then
-                res=0
-            else
-                for idx in "${!resources[@]}"; do
-                    if [[ "${resources[$idx]}" == "$selection" ]]; then
-                        res=$((idx+1))
-                        break
-                    fi
-                done
-            fi
         else
             read -rp "Select resource (0-${#resources[@]}): " res
         fi
@@ -938,35 +886,6 @@ cyber_resources() {
         fi
         $NON_INTERACTIVE && break
     done
-}
-
-# Fuzzy search utility using fzf
-fzf_search() {
-    local search_dir
-    color_echo "${CYAN}Enter directory to search (leave blank for entire system '/'):${NC}"
-    read -rp "Directory: " search_dir
-    if [[ -z "$search_dir" ]]; then
-        search_dir="/"
-    fi
-    if [[ ! -d "$search_dir" ]]; then
-        color_echo "${RED}Directory not found: $search_dir${NC}"
-        return 1
-    fi
-    local preview_cmd=''
-    if command_exists batcat; then
-        preview_cmd='batcat --style=numbers --color=always --line-range :500 {}'
-    elif command_exists bat; then
-        preview_cmd='bat --style=numbers --color=always --line-range :500 {}'
-    else
-        preview_cmd='head -40 {}'
-    fi
-    if command_exists fzf; then
-        find "$search_dir" -type f 2>/dev/null | \
-            fzf --prompt="Search files: " --preview="$preview_cmd" --height=20 --border --ansi
-    else
-        color_echo "${YELLOW}fzf is not installed. Please install fzf to use search.${NC}"
-        return 1
-    fi
 }
 
 # Run all features with progress tracking
@@ -1058,8 +977,7 @@ feature_menu() {
     echo "  10. 🔧 Install Dependencies"
     echo "  11. ℹ️  System Status"
     echo "  12. 📜 View Logs"
-    echo "  13. 🔍 Search Files"
-    echo "  14. 🚪 Exit"
+    echo "  13. 🚪 Exit"
     echo
 }
 
@@ -1104,33 +1022,17 @@ system_status() {
 # View logs function
 view_logs() {
     color_echo "${BLUE}=== Available Logs ===${NC}"
-    local log_options=(
-        "Main Log"
-        "Scan Results"
-        "System Log (auth)"
-        "Firewall Log"
-        "Forensics Logs"
-        "Back"
-    )
+    echo "1. Main Log"
+    echo "2. Scan Results"
+    echo "3. System Log (auth)"
+    echo "4. Firewall Log"
+    echo "5. Forensics Logs"
+    echo "0. Back"
+
     local log_choice
     if $NON_INTERACTIVE; then
-        log_choice=5
-    elif command_exists fzf && [[ -t 0 ]]; then
-        local selection
-        selection=$(fzf_select "Select log" "${log_options[@]}")
-        for idx in "${!log_options[@]}"; do
-            if [[ "${log_options[$idx]}" == "$selection" ]]; then
-                log_choice=$((idx+1))
-                break
-            fi
-        done
+        log_choice=0
     else
-        echo "1. Main Log"
-        echo "2. Scan Results"
-        echo "3. System Log (auth)"
-        echo "4. Firewall Log"
-        echo "5. Forensics Logs"
-        echo "0. Back"
         read -rp "Select log to view: " log_choice
     fi
 
@@ -1166,39 +1068,19 @@ view_logs() {
         5)
             # Forensics logs submenu
             color_echo "${CYAN}=== Forensics Logs ===${NC}"
-            local forensics_options=(
-                "SUID/SGID log"
-                "World-writable log"
-                "No owner/group log"
-                "Open ports log"
-                "Running processes log"
-                "Crontabs log"
-                "Init scripts log"
-                "Systemd services log"
-                "Back"
-            )
+            echo "1. SUID/SGID log"
+            echo "2. World-writable log"
+            echo "3. No owner/group log"
+            echo "4. Open ports log"
+            echo "5. Running processes log"
+            echo "6. Crontabs log"
+            echo "7. Init scripts log"
+            echo "8. Systemd services log"
+            echo "0. Back"
             local forensics_choice
             if $NON_INTERACTIVE; then
-                forensics_choice=9
-            elif command_exists fzf && [[ -t 0 ]]; then
-                local selection
-                selection=$(fzf_select "Select forensics log" "${forensics_options[@]}")
-                for idx in "${!forensics_options[@]}"; do
-                    if [[ "${forensics_options[$idx]}" == "$selection" ]]; then
-                        forensics_choice=$((idx+1))
-                        break
-                    fi
-                done
+                forensics_choice=0
             else
-                echo "1. SUID/SGID log"
-                echo "2. World-writable log"
-                echo "3. No owner/group log"
-                echo "4. Open ports log"
-                echo "5. Running processes log"
-                echo "6. Crontabs log"
-                echo "7. Init scripts log"
-                echo "8. Systemd services log"
-                echo "0. Back"
                 read -rp "Select forensics log to view: " forensics_choice
             fi
             case $forensics_choice in
@@ -1210,11 +1092,11 @@ view_logs() {
                 6) color_echo "${CYAN}=== Crontabs log (first 40 lines) ===${NC}"; head -40 "$SCAN_DIR/crontabs.log" 2>/dev/null || color_echo "${YELLOW}Not found${NC}";;
                 7) color_echo "${CYAN}=== Init scripts log (first 40 lines) ===${NC}"; head -40 "$SCAN_DIR/init_scripts.log" 2>/dev/null || color_echo "${YELLOW}Not found${NC}";;
                 8) color_echo "${CYAN}=== Systemd services log (first 40 lines) ===${NC}"; head -40 "$SCAN_DIR/systemd_services.log" 2>/dev/null || color_echo "${YELLOW}Not found${NC}";;
-                9|0) return 0;;
+                0) return 0;;
                 *) color_echo "${RED}Invalid selection${NC}";;
             esac
             ;;
-        6|0)
+        0)
             return 0
             ;;
         *)
@@ -1273,9 +1155,9 @@ main() {
         feature_menu
         local choice
         if $NON_INTERACTIVE; then
-            choice=14
+            choice=13
         else
-            read -rp "Enter choice (1-14): " choice
+            read -rp "Enter choice (1-13): " choice
         fi
 
         case $choice in
@@ -1316,32 +1198,12 @@ main() {
                 view_logs
                 ;;
             13)
-                color_echo "${CYAN}Fuzzy Search Instructions:${NC}"
-                color_echo "${BLUE}- Use arrow keys or Ctrl-N/P to move up/down the list of files.${NC}"
-                color_echo "${BLUE}- Type to filter files by name (supports fuzzy matching, case-insensitive).${NC}"
-                color_echo "${BLUE}- Press Enter to select a file and exit. The selected file path will be printed to the terminal.${NC}"
-                color_echo "${BLUE}- Press Tab or Shift-Tab to mark multiple files (multi-select, if enabled).${NC}"
-                color_echo "${BLUE}- Use Ctrl-A to select all, Ctrl-D to deselect all (multi-select, if enabled).${NC}"
-                color_echo "${BLUE}- Use the right arrow or Ctrl-/ to toggle the preview window showing file contents.${NC}"
-                color_echo "${BLUE}- Press ESC or Ctrl-C to cancel and return to the menu without selecting a file.${NC}"
-                color_echo "${BLUE}- Search supports AND (space), OR (|), and NOT (!) operators for advanced filtering.${NC}"
-                color_echo "${BLUE}- You can resize the preview window with Alt+Up/Down (if your terminal supports it).${NC}"
-                color_echo "${BLUE}- If you see no files, check your permissions or try running as administrator/root.${NC}"
-                color_echo "${BLUE}- The search starts in the current directory. To search elsewhere, run: fzf_search /path/to/dir${NC}"
-                color_echo "${BLUE}- If you have 'bat' or 'batcat' installed, previews will be syntax-highlighted. Otherwise, plain text is shown.${NC}"
-                color_echo "${YELLOW}Tip: For best results, use fzf in a true terminal (not a limited shell window).${NC}"
-                color_echo "${YELLOW}Tip: You can pipe the result to other commands, e.g., open, less, or cat.${NC}"
-                color_echo "${BLUE}- To search for files containing a literal substring (like .mp3), type a single quote ' before your search term: '.mp3${NC}"
-                color_echo "${BLUE}  This will only show files with .mp3 in their name (not fuzzy matches).${NC}"
-                fzf_search
-                ;;
-            14)
                 color_echo "${GREEN}Thank you for using CyberPatriot Toolkit!${NC}"
                 log_info "CyberPatriot toolkit session ended"
                 exit 0
                 ;;
             *)
-                color_echo "${RED}Invalid option. Please choose 1-14.${NC}" >&2
+                color_echo "${RED}Invalid option. Please choose 1-13.${NC}" >&2
                 ;;
         esac
 

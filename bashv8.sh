@@ -1064,10 +1064,16 @@ feature_menu() {
     # Clear screen if possible
     command_exists clear && clear || printf '\033[2J\033[H'
 
-    color_echo "${GREEN}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${NC}"
-    color_echo "${GREEN}┃           Recneps Toolkit              ┃${NC}"
-    color_echo "${GREEN}┃     Enhanced Security Suite v8.2       ┃${NC}"
-    color_echo "${GREEN}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┗${NC}"
+    color_echo "${GREEN} ████████   ██████   ██████  ████████    ██████  ████████   █████ ${NC}"
+    color_echo "${GREEN}░░███░░███ ███░░███ ███░░███░░███░░███  ███░░███░░███░░███ ███░░  ${NC}"
+    color_echo "${GREEN} ░███ ░░░ ░███████ ░███ ░░░  ░███ ░███ ░███████  ░███ ░███░░█████ ${NC}"
+    color_echo "${GREEN} ░███     ░███░░░  ░███  ███ ░███ ░███ ░███░░░   ░███ ░███ ░░░░███${NC}"
+    color_echo "${GREEN} █████    ░░██████ ░░██████  ████ █████░░██████  ░███████  ██████ ${NC}"
+    color_echo "${GREEN}░░░░░      ░░░░░░   ░░░░░░  ░░░░ ░░░░░  ░░░░░░   ░███░░░  ░░░░░░  ${NC}"
+    color_echo "${GREEN}                                                 ░███             ${NC}"
+    color_echo "${GREEN}                                                 █████            ${NC}"
+    color_echo "${GREEN}                                                ░░░░░             ${NC}"
+    
     echo
     color_echo "${BLUE}Security Features:${NC}"
     echo "  1.  🛡️ Firewall Setup & Configuration"
